@@ -73,7 +73,7 @@ def cisco_conf_task_3():
     c_maps = cfg_file.find_parents_wo_child("^crypto map CRYPTO","^ set transform-set AES")
     x = 1
     for element in c_maps:
-        print "entry # %s that are using PFS group2:  %s" % (x, element)
+        print "entry # %s that are not using AES:  %s" % (x, element)
         x += 1
 
 create_json_file(list)

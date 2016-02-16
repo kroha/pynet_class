@@ -173,6 +173,8 @@ def main():
     data_save(all_data)
     draw_data(all_data)    
     
+    print all_data
+    
     email_send(all_data[5])
 
 if __name__ == "__main__":

@@ -1,0 +1,273 @@
+CLASS 3
+
+	I. SNMPv3
+
+    II. SNMP Interface Data
+
+   III. Graphing SNMP Data
+
+   IV. Sending Emails
+
+
+SNMPv3 Reference Material
+
+Below is the SNMPv3 configuration that I used on the two Cisco routers in the lab environment.
+
+>>>>
+
+# Create a view of what can be seen in the SNMP tree (this view actually
+# specifies the entire tree is visible).
+snmp-server view VIEWSTD iso included
+
+# Create an SNMP Group using SNMPv3 with authentication and encryption, 
+# read-only, using VIEWSTD, filtered by ACL98.  Group name is 'READONLY'.  
+# 'priv' indicates authentication and encryption is used.
+snmp-server group READONLY v3 priv read VIEWSTD access 98
+
+# Bind a user to the SNMP group, specify SHA1 for auth and AES128 for encryption.
+# Specify the authentication and encryption keys
+snmp-server user <user> READONLY v3 auth sha <password> priv aes 128 <key>
+
+>>>>
+
+In the lab environment, I am using the following credentials:
+
+username:       pysnmp
+auth_key:        galileo1          
+encrypt_key:   galileo1
+
+
+Graphing SNMP Data
+
+For graphing, I am using the pygal SVG graphics library:
+http://pygal.org/
+
+You can use this library to create SVG images.  SVG images should generally work with newer browsers (Chrome, Firefox, Safari, IE9+):
+
+SVG Browser support:
+http://caniuse.com/#feat=svg
+
+
+The below code creates an SVG image using pygal from SNMP interface data.
+
+>>>> CODE <<<<
+
+import pygal
+
+fa4_in_octets = [5269, 5011, 6705, 5987, 5011, 5071, 6451, 5011, 5011, 6181, 5281, 5011]
+fa4_out_octets =[5725, 5783, 7670, 6783, 5398, 5783, 9219, 3402, 5783, 6953, 5668, 5783]
+
+fa4_in_packets = [24, 21, 40, 32, 21, 21, 49, 9, 21, 34, 24, 21]
+fa4_out_packets = [24, 21, 40, 32, 21, 21, 49, 9, 21, 34, 24, 21]
+
+# Create a Chart of type Line
+line_chart = pygal.Line()
+
+# Title
+line_chart.title = 'Input/Output Packets and Bytes'
+
+# X-axis labels (samples were every five minutes)
+line_chart.x_labels = ['5', '10', '15', '20', '25', '30', '35', '40', '45', '50', '55', '60']
+
+# Add each one of the above lists into the graph as a line with corresponding label
+line_chart.add('InPackets', fa4_in_packets)
+line_chart.add('OutPackets',  fa4_out_packets)
+line_chart.add('InBytes', fa4_out_octets)
+line_chart.add('OutBytes', fa4_in_octets)
+
+# Create an output image file from this
+line_chart.render_to_file('test.svg')
+
+>>>> END CODE <<<<
+
+You can view the image that was created at:
+https://pynet.twb-tech.com/static/img/snmp_interfaces.svg
+
+
+
+
+
+Sending Emails via Python
+
+The below code defines a function that sends an email. Note, the code assumes that you have an SMTP server listening on localhost. The lab server meets this requirement.
+
+If you are developing on your own machine, then you need an email server that you can send through.
+
+>>>> CODE <<<<
+def send_mail(recipient, subject, message, sender):
+    '''
+    Simple function to help simplify sending SMTP email
+
+    Assumes a mailserver is available on localhost
+    '''
+
+    import smtplib
+    from email.mime.text import MIMEText
+
+    message = MIMEText(message)
+    message['Subject'] = subject
+    message['From'] = sender
+    message['To'] = recipient
+
+    # Create SMTP connection object to localhost
+    smtp_conn = smtplib.SMTP('localhost')
+
+    # Send the email
+    smtp_conn.sendmail(sender, recipient, message.as_string())
+
+    # Close SMTP connection
+
+    smtp_conn.quit()
+
+    return True
+
+>>>> END CODE <<<<
+
+
+You then send an email using the above function as follows:
+
+>>>> CODE <<<<
+import email_helper
+
+recipient = 'ktbyersx@gmail.com'
+subject = 'Test message'
+message = '''
+
+This is a fictional test message.
+
+
+Regards,
+
+Kirk
+
+'''
+
+sender = 'ktbyers@twb-tech.com'
+email_helper.send_mail(recipient, subject, message, sender)
+
+>>>> END CODE <<<<
+
+
+This email function is installed in the lab environment and is also available on GitHub at:
+https://github.com/ktbyers/pynet/blob/master/email/email_helper.py
+
+Python-Gmail Email Reference Link
+
+Includes example of emailing via external Gmail server with authentication
+http://rosettacode.org/wiki/Send_an_email#Python
+
+Note, programmatically emailing via Gmail is very problematic due to Google's security restrictions. I recommend that you find a simpler solution than this.
+
+Exercises:
+My solutions to these exercises are posted at:
+https://github.com/ktbyers/pynet/tree/master/pyth_ans_ecourse/class3
+
+1. Using SNMPv3 create a script that detects router configuration changes.
+
+If the running configuration has changed, then send an email notification to yourself identifying the router that changed and the time that it changed.
+
+Note, the running configuration of pynet-rtr2 is changing every 15 minutes (roughly at 0, 15, 30, and 45 minutes after the hour).  
+This will allow you to test your script in the lab environment. 
+
+In this exercise, you will possibly need to save data to an external file. One way you can accomplish this is by using a pickle file, see:  
+    http://youtu.be/ZJOJjyhhEvM  
+
+A pickle file lets you save native Python data structures (dictionaries, lists, objects) directly to a file.
+
+Here is some additional reference material that you will probably need to solve this problem:
+
+Cisco routers have the following three OIDs:
+
+# Uptime when running config last changed
+ccmHistoryRunningLastChanged = '1.3.6.1.4.1.9.9.43.1.1.1.0'   
+
+# Uptime when running config last saved (note any 'write' constitutes a save)    
+ccmHistoryRunningLastSaved = '1.3.6.1.4.1.9.9.43.1.1.2.0'   
+
+# Uptime when startup config last saved   
+ccmHistoryStartupLastChanged = '1.3.6.1.4.1.9.9.43.1.1.3.0'
+
+From the above descriptions, the router will save the sysUptime timestamp (OID sysUptime = 1.3.6.1.2.1.1.3.0) when a running configuration change occurs. 
+The router will also record the sysUptime timestamp when the running configuration is saved to the startup config.
+
+​Here is some data on the behavior of these OIDs. Note, sysUptime times are in hundredths of seconds so 317579 equals 3175.79 seconds (i.e. a bit less than one hour)
+
+# After reboot
+pynet-rtr2.twb-tech.com
+317579        (sysUptime)
+2440            (ccmHistoryRunningLastChanged--running-config is changed during boot)
+0                  (ccmHistoryRunningLastSaved -- i.e. reset to 0 on reload)
+0                  (ccmHistoryStartupLastChanged -- i.e. reset to 0 on reload)
+
+# After config change on router (but no save to startup config)
+pynet-rtr2.twb-tech.com
+322522        (sysUptime)
+322219        (ccmHistoryRunningLastChanged)
+0                  (ccmHistoryRunningLastSaved)
+0                  (ccmHistoryStartupLastChanged)
+
+# After 'write mem' on router
+pynet-rtr2.twb-tech.com
+324543        (sysUptime)
+322219        (ccmHistoryRunningLastChanged)
+323912        (ccmHistoryRunningLastSaved)
+323912        (ccmHistoryStartupLastChanged)
+
+# After another configuration change (but no save to startup config)
+pynet-rtr2.twb-tech.com
+327177        (sysUptime)
+326813        (ccmHistoryRunningLastChanged)
+323912        (ccmHistoryRunningLastSaved)
+323912        (ccmHistoryStartupLastChanged)
+
+# After 'show run' command (note, this causes 'ccmHistoryRunningLastSaved' to 
+# increase i.e. 'write terminal' causes this OID to be updated)
+pynet-rtr2.twb-tech.com
+343223        (sysUptime)
+326813        (ccmHistoryRunningLastChanged)
+342898        (ccmHistoryRunningLastSaved)
+323912        (ccmHistoryStartupLastChanged)
+
+
+Bonus challenge: instead of saving your data in a pickle file, save the data using either a YAML or a JSON file. 
+
+My alternate solution supports pickle, YAML, or JSON depending on the name of the file (.pkl, .yml, or .json).
+
+2. Using SNMPv3 create two SVG image files.  
+
+The first image file should graph the input and output octets on interface FA4 on pynet-rtr1 every five minutes for an hour.  
+Use the pygal library to create the SVG graph file. Note, you should be doing a subtraction here (i.e. the input/output octets transmitted during this five minute interval).  
+
+The second SVG graph file should be the same as the first except graph the unicast packets received and transmitted.
+
+The relevant OIDs are as follows:
+
+('ifDescr_fa4', '1.3.6.1.2.1.2.2.1.2.5')
+('ifInOctets_fa4', '1.3.6.1.2.1.2.2.1.10.5')
+('ifInUcastPkts_fa4', '1.3.6.1.2.1.2.2.1.11.5')
+('ifOutOctets_fa4', '1.3.6.1.2.1.2.2.1.16.5'),
+('ifOutUcastPkts_fa4', '1.3.6.1.2.1.2.2.1.17.5')
+
+
+Note, you should be able to scp (secure copy) your image file off the lab server. 
+You can then open up the file using a browser.  For example, on MacOs I did the following (from the MacOs terminal):
+
+scp kbyers@<hostname>:SNMP/class2/test.svg .
+
+This copied the file from ~kbyers/SNMP/class2/test.svg to the current directory on my MAC.  
+
+The format of the command is:
+
+scp <remote-username>@<remote-hostname>:<remote_path>/<remote_file> .
+
+The period at the end indicates the file should be copied to the current directory on the local machine.
+
+For Windows, you can use PuTTY scp
+
+You might need to ensure that pscp.exe (putty scp) is in your Windows PATH.
+
+Note, the example on the cornell.edu site is doing a copy of a local file to a remote server. You would need to do the opposite i.e. copy a remote file to your local computer:
+
+pscp <remote-username>@<remote-hostname>:<remote_path>/<remote_file> .
+
+

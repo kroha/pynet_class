@@ -129,6 +129,10 @@ def email_send(time):
         part.add_header('Content-Disposition', 'attachment', filename="in_out_octets.svg")
         msg.attach(part)
 
+        part = MIMEApplication(open("/home/arudas/git/pynet_class/class3/in_out_packets.svg","rb").read())
+        part.add_header('Content-Disposition', 'attachment', filename="in_out_packets.svg")
+        msg.attach(part)
+
         smtp_conn = smtplib.SMTP('localhost')
         smtp_conn.sendmail(sender, recipient, msg.as_string())
         smtp_conn.quit()

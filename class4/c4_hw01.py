@@ -3,6 +3,7 @@
 import Queue
 import threading
 
+import datetime
 import paramiko
 import netmiko
 import pexpect
@@ -56,6 +57,7 @@ def init_lab3_4():
     return conn
 
 def init_lab5_8(device):
+    datetime
     conn = netmiko.ConnectHandler(**device)
     return conn
 
@@ -104,7 +106,7 @@ def lab3_4(conn):
     print "\nLab4: change buffer size and print show run:\n" + str(conn.before)
     
 def lab5_8(qu,dev):
-    
+    print "\nStart time for thread/device " + str(dev) + " " + str(datetime.datetime.now()) 
     # multithread YAY!
     qu.put(init_lab5_8(dev))
     conn = qu.get()
@@ -131,6 +133,7 @@ def lab5_8(qu,dev):
         output = conn.send_command("show run | i buffered")
         print "\nLab 8:\n log buf changed via file for device: " + str(conn.base_prompt) + "\n Result: \n\t" + str(output)
 
+    print "\nStop time for thread/device " + str(conn.base_prompt) + " " + str(datetime.datetime.now())
 
 def main():
     

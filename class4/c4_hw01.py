@@ -1,12 +1,13 @@
 #!/home/arudas/venv/bin/python
 
-from netmiko import ConnectHandler
+import Queue
+import threading
 
 import paramiko
+import netmiko
 import pexpect
 import pprint
 import time
-import re
 
 ip = '50.76.53.27'
 user = 'pyclass'
@@ -38,6 +39,8 @@ dev3 = {
 
 }
 
+devs = [dev1, dev2, dev3] 
+
 def init_lab1_2():
     conn = paramiko.SSHClient()
     conn.load_system_host_keys()
@@ -53,7 +56,7 @@ def init_lab3_4():
     return conn
 
 def init_lab5_8(device):
-    conn = ConnectHandler(**device)
+    conn = netmiko.ConnectHandler(**device)
     return conn
 
 def send_data(r_conn,cmd,time_sleep):
@@ -100,7 +103,12 @@ def lab3_4(conn):
 
     print "\nLab4: change buffer size and print show run:\n" + str(conn.before)
     
-def lab5_8(conn,dev):
+def lab5_8(qu,dev):
+    
+    # multithread YAY!
+    qu.put(init_lab5_8(dev))
+    conn = qu.get()
+    
     if conn.device_type  == 'cisco_ios':
         if conn.check_config_mode() != True:
             conn.config_mode()
@@ -111,14 +119,12 @@ def lab5_8(conn,dev):
     elif conn.device_type == 'juniper':
         output = conn.send_command("sh arp")
         print "\nLab6:\nARP Table from device: " + str(conn.base_prompt) + "\n Result:" + str(output)
-    
     if str(conn.base_prompt) == 'pynet-rtr2':
         conn.config_mode()
         output = conn.send_command("logging buffered 680200")
         conn.exit_config_mode()
         output = conn.send_command("show run | i buffered")
         print "\nLab 7:\n log buf changed via netmiko for device: " + str(conn.base_prompt) + "\n Result: \n\t" + str(output) 
-    
     if str(conn.base_prompt) == 'pynet-rtr2' or str(conn.base_prompt) == 'pynet-rtr1':
         conn.send_config_from_file(config_file='cfg_change.txt')
         conn.exit_config_mode()
@@ -127,23 +133,26 @@ def lab5_8(conn,dev):
 
 
 def main():
+    
+    # Lab 1-2
+
     conn = init_lab1_2()
     r_conn = conn.invoke_shell()
 
-    # lab1(r_conn)
-    # lab2(r_conn)
+    lab1(r_conn)
+    lab2(r_conn)
 
+    # Lab 3-4
     conn = init_lab3_4()
-    # lab3_4(conn)
+    lab3_4(conn)
     
-    conn1 = init_lab5_8(dev1)
-    conn2 = init_lab5_8(dev2)
-    conn3 = init_lab5_8(dev3)
-    lab5_8(conn1,dev1)
-    lab5_8(conn2,dev2)
-    lab5_8(conn3,dev3)
+    # Lab 5-8 + bonus
+
+    qu = Queue.Queue()
+    for dev in devs:
+        thread = threading.Thread(target=lab5_8, args = (qu,dev))
+        thread.start()
 
 if __name__ == "__main__":
     main()
-
 

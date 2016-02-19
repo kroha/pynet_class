@@ -1,0 +1,118 @@
+    I. Roles, Templating, and POAP/ZTP
+   II. Ansible and Arista, Part1
+  III. Ansible and Arista, Part2
+   IV. Ansible and Arista, Part3
+    V. Lab Environment and Arista
+   VI. Cisco File Transfer using Ansible
+
+NAT Mappings
+pynet-rtr1 (Cisco 881) snmp_port=7961, ssh_port=22
+pynet-rtr2 (Cisco 881) snmp_port=8061, ssh_port=8022
+pynet-sw1 (Arista vEOS switch) ssh_port=8222, eapi_port=8243
+pynet-sw2 (Arista vEOS switch) ssh_port=8322, eapi_port=8343
+pynet-sw3 (Arista vEOS switch) ssh_port=8422, eapi_port=8443
+pynet-sw4 (Arista vEOS switch) ssh_port=8522, eapi_port=8543
+pynet-jnpr-srx1 (Juniper SRX) ssh_port=9822, netconf_port=830
+
+The Arista-Ansible modules and the cisco_file_transfer.py module are located in ~/ANSIBLE/library. 
+Ansible will need to know how to find these modules when you execute your playbook. 
+By default, Ansible will look for a ./library subdirectory relative to your playbook's location. 
+Consequenlty, you can place your playbooks in ~/ANSIBLE and Ansible will be able to find the libraries. 
+Alternatively, you can specify where the libraries are located by using the '--module-path' argument:
+
+ ansible-playbook <playbook_name> --module-path ~/ANSIBLE/library/
+
+Ansible Modules:
+	https://github.com/arista-eosplus/ansible-eos
+	http://github.com/ktbyers/scp_sidecar
+
+Cisco POAP References:
+	http://www.netcraftsmen.net/blogs/entry/what-is-poap-and-why-aren-t-you-using-it.html
+	http://www.cisco.com/c/en/us/td/docs/switches/datacenter/nexus3000/sw/fundamentals/503_U3_1/b_Nexus_3000_Fundamentals_Guide_Release_503_U3_1/b_Nexus_3000_Fundamentals_Guide_Release_503_U3_1_chapter_0111.pdf
+
+Arista ZTP References
+	https://www.arista.com/assets/data/pdf/TechBulletins/Tech_bulletin_ZTP.pdf
+	http://ztpserver.readthedocs.org/en/master/overview.html
+
+
+mportant notes about the lab environment
+
+1. You will need to do this week's exercises on the AWS lab server. 
+
+2. You have been assigned an Arista vEOS switch and an interface on this switch to work on. These items are specified in the 'ansible-hosts' file in your home directory.
+
+For example, your ~/ansible-hosts file will contain something similar to the following:
+[arista]
+# primary interface == EthernetX
+# secondary interface == EthernetY
+pynet-swx ansible_connection=local eapi_username=eapi eapi_password=<passwd> 
+    eapi_hostname=50.76.53.27 eapi_port=XXXX
+
+EthernetX will be your primary switch interface
+EthernetY will be your backup switch interface  
+XXXX will be the eapi_port to use (for example, 8243)
+
+Use the backup switch interface, if the primary switch interface is already in use.
+
+Remember each Arista vEOS switch is shared with a set of students so be considerate of the other students while working on it. 
+
+3. You should create your playbooks in the ~/ANSIBLE directory. This is so Ansible knows how to find the relevant modules (these modules are located in ~/ANSIBLE/library).
+
+
+4. Please do NOT change any of the following on the Arista switches:
+
+    a. The VLAN1 IP address
+    b. The default gateway
+    c. The Ethernet1 interface
+
+Also please do NOT shutdown any of the Arista Ethernet interfaces. 
+For some reason disabling any of the Ethernet interfaces causes the vEOS switch to completely lose connectivity. 
+
+
+
+Exercises
+
+If you haven't already read them, please see the important lab notes above.
+
+My solutions to these exercises are posted at:
+https://github.com/ktbyers/pynet/tree/master/pyth_ans_ecourse/class6
+
+
+1. Using Ansible, configure three VLANs on the Arista switch specifying both the VLAN IDs and the VLAN names.  
+For the VLAN IDs randomly pick three numbers between 100 and 999.
+
+
+2. Use Ansible to configure your 'primary Ethernet interface' as follows:
+
+interface description:     *** IN USE ***
+switchport mode:          access
+VLAN:                           <one of the VLANs created in exercise1>
+
+Your 'primary Ethernet interface' is specified in your ~/ansible-hosts file.
+
+If your primary interface is already 'IN USE' (by someone else), then use your secondary interface (once again specified in ~/ansible-hosts).  
+You can determine if an interface is already in use by SSH'ing into the switch. Reminder, do NOT use Ethernet1.
+
+
+3. Use Ansible to configure your 'primary Ethernet interface' as follows:
+
+switchport mode:           trunk
+trunk native VLAN:        VLAN1
+trunk allowed VLANs:    <the three VLANs created in exercise1>
+
+
+4. Use Ansible to restore your 'primary Ethernet interface' back to the following state (or your secondary interface depending on which one you used):
+
+description:                    <none>
+switchport mode:           access
+access VLAN:                1
+trunk allowed VLANs:    all
+
+Also use Ansible to remove the three VLANs that you configured.
+
+
+5. Use the cisco_file_transfer.py module to transfer a small file to the Cisco pynet-rtr1 router.
+
+
+
+

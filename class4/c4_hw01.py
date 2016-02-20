@@ -106,10 +106,15 @@ def lab3_4(conn):
     print "\nLab4: change buffer size and print show run:\n" + str(conn.before)
     
 def lab5_8(qu,dev):
+
+    # Lab 9 - multithreading timers
     print "\nStart time for thread/device " + str(dev) + " " + str(datetime.datetime.now()) 
-    # multithread YAY!
-    qu.put(init_lab5_8(dev))
-    conn = qu.get()
+
+    # multithread with put/get 
+    # qu.put(init_lab5_8(dev))
+    # conn = qu.get()
+
+    conn = init_lab5_8(dev)
     
     if conn.device_type  == 'cisco_ios':
         if conn.check_config_mode() != True:
@@ -149,11 +154,10 @@ def main():
     conn = init_lab3_4()
     lab3_4(conn)
     
-    # Lab 5-8 + bonus
-
+    # Lab 5-8 + 9
     qu = Queue.Queue()
     for dev in devs:
-        thread = threading.Thread(target=lab5_8, args = (qu,dev))
+        thread = threading.Thread(target=lab5_8, args = (qu, dev))
         thread.start()
 
 if __name__ == "__main__":

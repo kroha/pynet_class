@@ -1,0 +1,13 @@
+---
+- hosts: local
+  tasks:
+    - name: Generate config files
+      template: src=/home/arudas/git/pynet_class/class5/c5_sw_config.j2
+                dest=/home/arudas/git/pynet_class/class5/config/{{item.hostname}}.txt
+      with_items:
+        - { hostname: lab5_sw1, total_ports: 2, ip_addr: 10.200.0.11, default_gateway: 10.200.0.1, secret: SECRET_PASS,  access_vlan: 100,  SNMPv3: True  }
+        - { hostname: lab5_sw2, total_ports: 4, ip_addr: 10.200.0.12, default_gateway: 10.200.0.1, secret: SECRET_PASS,  access_vlan: 100,  SNMPv3: False, snmp_community: SNMP_READ_COMM  }
+        - { hostname: lab5_sw3, total_ports: 3, ip_addr: 10.200.0.13, default_gateway: 10.200.0.1, secret: SECRET_PASS,  access_vlan: 100,  SNMPv3: True  }
+        - { hostname: lab5_sw4, total_ports: 2, ip_addr: 10.200.0.14, default_gateway: 10.200.0.1, secret: SECRET_PASS,  access_vlan: 100,  SNMPv3: False, snmp_community: SNMP_READ_COMM  }
+        - { hostname: lab5_sw5, total_ports: 5, ip_addr: 10.200.0.15, default_gateway: 10.200.0.1, secret: SECRET_PASS,  access_vlan: 100,  SNMPv3: True  }
+

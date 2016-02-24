@@ -1,0 +1,93 @@
+---
+
+- name: Create Arista VLAN
+  hosts: arista
+  tasks:
+    - name: name of task create BLUE VLAN
+      eos_vlan: 
+        name=BLUE-VLAN-100
+        vlanid=100
+        username={{ eapi_username }} 
+        password={{ eapi_password }}
+        host={{ eapi_hostname }}
+        port={{ eapi_port }}
+        transport=https
+        debug=yes
+
+    - name: name of task create RED VLAN
+      eos_vlan: 
+        name=RED-VLAN-200
+        vlanid=200
+        username={{ eapi_username }}
+        password={{ eapi_password }}
+        host={{ eapi_hostname }}
+        port={{ eapi_port }}
+        transport=https
+        debug=yes
+
+    - name: name of task create GREEN VLAN
+      eos_vlan: 
+        name=GREEN-VLAN-300 
+        vlanid=300
+        username={{ eapi_username }}
+        password={{ eapi_password }}
+        host={{ eapi_hostname }}
+        port={{ eapi_port }}
+        transport=https
+        debug=yes
+
+    - name: Set interfaces 2-4 to access mode, VLAN 200
+      eos_switchport: 
+        name=Ethernet2
+        mode=access
+        access_vlan=200
+        username={{ eapi_username }}
+        password={{ eapi_password }}
+        host={{ eapi_hostname }}
+        port={{ eapi_port }}
+        transport=https
+        debug=yes
+
+    - name: Config TRUNK links "3-4"
+      eos_switchport:  
+        name={{ item }}
+        mode=trunk
+        trunk_native_vlan=100
+        trunk_allowed_vlans=100,200
+        username={{ eapi_username }}
+        password={{ eapi_password }}
+        host={{ eapi_hostname }}
+        port={{ eapi_port }}
+        transport=https
+        debug=yes
+      with_items:
+        - Ethernet3
+        - Ethernet4
+    - name: Configure LAG
+      eos_portchannel: 
+        enable=True
+        name=Port-Channel1
+        description="# Port-Channel / TRUNK"
+        members=Ethernet3,Ethernet4
+        lacp_mode=active
+        username={{ eapi_username }}
+        password={{ eapi_password }}
+        host={{ eapi_hostname }}
+        port={{ eapi_port }}
+        transport=https
+        debug=yes
+
+    - name: Execute command on Arista
+      eos_command: 
+        commands="write memory"
+        username={{ eapi_username }}
+        password={{ eapi_password }}
+        host={{ eapi_hostname }}
+        port={{ eapi_port }}
+        transport=https
+        debug=yes
+      register: cmd_out
+    
+    - debug:
+        var=cmd_out
+        

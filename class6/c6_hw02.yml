@@ -1,0 +1,62 @@
+---
+
+- name: "Class 6 / Lab 4 / Config cleanup"
+  hosts: arista
+  tasks: 
+    - name: "Lab 4: VLAN cleanup"
+      eos_vlan:
+        name={{ item.name }}
+        vlanid={{ item.vlanid }}
+        state=absent
+        username={{ eapi_username }}
+        password={{ eapi_password }}
+        host={{ eapi_hostname }}
+        port={{ eapi_port }}
+        transport=https
+      with_items:
+            - { name: 'VLAN_510', vlanid: '510' }
+            - { name: 'VLAN_520', vlanid: '520' }
+            - { name: 'VLAN_530', vlanid: '530' }
+
+    - name: "Lab4: Ethernet4 description cleanup"
+      eos_interface:
+        name=Ethernet4
+        description=""
+        username={{ eapi_username }}
+        password={{ eapi_password }}
+        host={{ eapi_hostname }}
+        port={{ eapi_port }}
+        transport=https
+
+    - name: "Lab4: Ethernet4 cleanup to access port default"
+      eos_switchport:
+        name=Ethernet4
+        access_vlan=1
+        mode=access
+        username={{ eapi_username }}
+        password={{ eapi_password }}       
+        host={{ eapi_hostname }}
+        port={{ eapi_port }}
+        transport=https
+
+    - name: "Lab4: Ethernet7 description cleanup"
+      eos_interface:
+        name=Ethernet7
+        description=""
+        username={{ eapi_username }}
+        password={{ eapi_password }}
+        host={{ eapi_hostname }}
+        port={{ eapi_port }}
+        transport=https
+
+    - name: "Lab4: Ethernet7 cleanup to access port default"
+      eos_switchport:
+        name=Ethernet7
+        mode=access
+        trunk_allowed_vlans=1-4094
+        username={{ eapi_username }}
+        password={{ eapi_password }}
+        host={{ eapi_hostname }}
+        port={{ eapi_port }}
+        transport=https
+

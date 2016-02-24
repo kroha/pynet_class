@@ -1,0 +1,18 @@
+---
+
+- name: Cisco IOS
+  hosts: cisco
+  gather_facts: Flase
+
+  tasks:
+    - name: Testing file transfer
+      cisco_file_transfer:
+        source_file="/home/arudas/git/pynet_class/class6/lec/cisco_file.log"
+        dest_file=cisco_file.log
+        overwrite=true
+        enable_scp=true
+        host={{ host }}
+        port={{ port }}
+        username={{ username }}
+        password={{ password  }}
+

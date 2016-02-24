@@ -1,0 +1,18 @@
+---
+
+- name: "Lab 5"
+  hosts: cisco
+  gather_facts: Flase
+  
+  tasks:
+    - name: "Copy file to cisco routers"
+      cisco_file_transfer:
+        source_file="/home/arudas/git/pynet_class/class6/cisco_config_lab6.txt"
+        dest_file=cisco_config_lab6.txt
+        overwrite=true
+        enable_scp=true
+        host={{ host }}
+        port={{ port }}
+        username={{ username }}
+        password={{ password  }}
+

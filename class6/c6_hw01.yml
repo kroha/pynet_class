@@ -1,0 +1,63 @@
+---
+
+- name: Class 6 / Lab 1
+  hosts: arista
+  tasks: 
+    - name: "Lab 1: Using Ansible, configure three VLANs on the Arista switch specifying both the VLAN IDs and the VLAN names"
+      eos_vlan:
+        name={{ item.name }}
+        vlanid={{ item.vlanid }}
+        username={{ eapi_username }}
+        password={{ eapi_password }}
+        host={{ eapi_hostname }}
+        port={{ eapi_port }}
+        transport=https
+      with_items:
+            - { name: 'VLAN_510', vlanid: '510' }
+            - { name: 'VLAN_520', vlanid: '520' }
+            - { name: 'VLAN_530', vlanid: '530' }
+
+    - name: "Lab2: Ethernet4 add description"
+      eos_interface:
+        state=present
+        name=Ethernet4
+        description="*** Primary IN USE ***"
+        username={{ eapi_username }}
+        password={{ eapi_password }}
+        host={{ eapi_hostname }}
+        port={{ eapi_port }}
+        transport=https
+
+    - name: "Lab2: Ethernet4 add access/vlan"
+      eos_switchport:
+        name=Ethernet4
+        access_vlan=510
+        mode=access
+        username={{ eapi_username }}
+        password={{ eapi_password }}       
+        host={{ eapi_hostname }}
+        port={{ eapi_port }}
+        transport=https
+
+    - name: "Lab2: Ethernet7 add description"
+      eos_interface:
+        state=present
+        name=Ethernet7
+        description="*** Secondary IN USE ***"
+        username={{ eapi_username }}
+        password={{ eapi_password }}
+        host={{ eapi_hostname }}
+        port={{ eapi_port }}
+        transport=https
+
+    - name: "Lab2: Ethernet7 add TRUNK/allow list/native"
+      eos_switchport:
+        name=Ethernet7
+        mode=trunk
+        trunk_allowed_vlans=510,520,530
+        trunk_native_vlan=1
+        username={{ eapi_username }}
+        password={{ eapi_password }}
+        host={{ eapi_hostname }}
+        port={{ eapi_port }}
+        transport=https

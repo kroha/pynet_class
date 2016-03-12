@@ -1,0 +1,87 @@
+Class 7 
+
+
+    I. Arista eAPI Introduction
+
+   II. eAPI Request Structure
+
+  III. Using eAPI from Python
+
+ IV. Making Configuration Changes using eAPI
+
+  V. Using pyeapi
+
+Arista eAPI Reference Material
+
+Arista pyeapi Library:
+https://github.com/arista-eosplus/pyeapi
+
+
+Arista JSON eAPI Example by Fred Hsu:
+http://fredhsu.wordpress.com/2014/02/13/arista-json-eapi-example/
+
+Arista eAPI Solution Brief
+
+Wikipedia JSON-RPC:
+http://en.wikipedia.org/wiki/JSON-RPC
+
+Integrated Development Environments (IDEs)
+
+I spent some time earlier reviewing Python IDEs. From reading various sources, PyCharm is the Python IDE that I would recommend (if you are interested in using an IDE).
+PyCharm has the following features--1)text highlighting, 2)automatic indenting, 3)code completion, 4)error detection, 
+5)advanced searching, and 6)debugging capabilities.  For a more complete list of features see:
+http://www.jetbrains.com/pycharm/features/
+Note, some of the listed features are in the paid version of the software.
+PyCharm is available on MacOs, Windows, and Linux.  There is a free version (Community Edition) available at:
+http://www.jetbrains.com/pycharm/download/
+
+This website has a good review of the various Python IDEs:
+http://www.pythoncentral.io/comparison-of-python-ides-development/
+
+On a related topic, quite a few people like Sublime Text.  Sublime Text is an advanced text editor which has many nice features 
+(Python aware highlighting, advanced searching, code quality checking).  Sublime text is licensed software; it costs $70. For more information see:
+
+http://www.sublimetext.com/
+
+
+Exercises:
+
+For these exercises, use the Arista switch that is defined in your ~/.eapi.conf file on the lab server.
+
+Note, due to issues with the jsonrpclib library and Python 2.7.10, you will not be able to directly use jsonrpclib to connect to eAPI. 
+For these exercises, we will use the pyeapi library instead. Using pyeapi is a superior method since it removes some of the lower level complexity.
+
+My solutions to these exercises are posted at:
+https://github.com/ktbyers/pynet/tree/master/pyth_ans_ecourse/class7
+
+1. Use Arista's eAPI to obtain 'show interfaces' from the switch. Parse the 'show interfaces' output to obtain the 'inOctets' and 'outOctets' 
+   fields for each of the interfaces on the switch.  Accomplish this using Arista's pyeapi.
+
+
+2. Using Arista's pyeapi, create a script that allows you to add a VLAN (both the VLAN ID and the VLAN name).  
+
+Your script should first check that the VLAN ID is available and only add the VLAN if it doesn't already exist.  
+Use VLAN IDs between 100 and 999.  You should be able to call the script from the command line as follows:
+
+   python eapi_vlan.py --name blue 100     # add VLAN100, name blue
+
+	If you call the script with the --remove option, the VLAN will be removed.
+
+   python eapi_vlan.py --remove 100          # remove VLAN100
+
+	Once again only remove the VLAN if it exists on the switch.  You will probably want to use Python's argparse to accomplish the argument processing.
+
+	In the lab environment, if you want to directly execute your script, then you will need to use '#!/usr/bin/env python' at the top of the script (instead of '!#/usr/bin/python').
+
+
+3. Challenge exercise (optional) -- Using Arista's eAPI, write an Ansible module that adds a VLAN (both a VLAN ID and a VLAN name).  
+   Do this in an idempotent manner i.e. only add the VLAN if it doesn't exist; only change the VLAN name if it is not correct. 
+
+To simplify this process, use the .eapi.conf file to store the connection arguments (username, password, host, port, transport).
+
+For additional reference, see:
+
+http://docs.ansible.com/ansible/developing_modules.html
+
+The 'Common Module Boilerplate' section is important.
+

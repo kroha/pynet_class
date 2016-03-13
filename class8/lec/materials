@@ -1,0 +1,106 @@
+      I. Django Setup and Modeling
+         video https://vimeo.com/140252772
+         Length is 13 minutes
+
+    II. Generating your Database
+           video https://vimeo.com/140260752
+           Length is 10 minutes
+
+   III. Foreign Keys
+           video https://vimeo.com/140317953
+           Length is 11 minutes
+
+   IV. Django CRUD
+           video https://vimeo.com/140332367
+           Length is 8 minutes
+
+    V. Netmiko Connection using ORM
+           video https://vimeo.com/140338633
+           Length is 14 minutes
+
+   VI. Concurrency Terminology
+           video https://vimeo.com/140344471
+           Length is 15 minutes
+
+  VII. Threads
+           video https://vimeo.com/140366713
+           Length is 9 minutes
+
+ VIII. Processes
+           video https://vimeo.com/140350006
+           Length is 9 minutes
+
+
+
+
+Errata and other Information:
+
+1. The models.py file that is installed in the lab environment already contains both the NetworkDevice and Credentials definitions. 
+Consequently, you only need to execute the following once:
+
+$ python manage.py makemigrations net_system
+$ python manage.py migrate
+
+It won't hurt anything to run these commands multiple times, but it is not necessary.
+
+2. I mentioned that the GIL was an inherent part of Python. This is not correct it is an inherent part of the CPython implementation. 
+There are other Python implementations that do not have a GIL.
+
+3. In Django 1.7 & 1.8 recreating a database object (i.e. creating an object using a primary key that already exists) does not generate an error. 
+Instead it will replace the existing object with the new object (which can cause its own set of issues). 
+
+Additional References:
+Django Notes File
+https://github.com/ktbyers/pynet/blob/master/pyth_ans_ecourse/class8/django_notes.txt
+Django Model Field Reference
+https://docs.djangoproject.com/en/1.8/ref/models/fields/
+Django Making Queries
+https://docs.djangoproject.com/en/1.8/topics/db/queries/
+Python Threads
+https://pymotw.com/2/threading/
+Python Multiprocessing
+https://pymotw.com/2/multiprocessing/basics.html
+Concurrency vs Parallelism - What is the difference?
+http://stackoverflow.com/questions/1050222/concurrency-vs-parallelism-what-is-the-difference
+
+Exercises:
+
+My solutions to these exercises are posted at:
+https://github.com/ktbyers/pynet/tree/master/pyth_ans_ecourse/class8
+
+See my above Django notes file for assistance on these exercises.  You will need to use the lab environment for these exercises.
+
+1. Initialize your Django database. Add the seven NetworkDevice objects and two Credentials objects into your database.  
+After this initialization, you should be able to do the following (from the ~/DJANGOX/djproject directory):
+
+$ python manage.py shell
+
+>>> from net_system.models import NetworkDevice, Credentials
+>>> net_devices = NetworkDevice.objects.all()
+>>> net_devices
+[<NetworkDevice: pynet-rtr1>, <NetworkDevice: pynet-sw1>, <NetworkDevice: pynet-sw2>, <NetworkDevice: pynet-sw3>, <NetworkDevice: pynet-sw4>, <NetworkDevice: juniper-srx>, <NetworkDevice: pynet-rtr2>]
+
+>>> creds = Credentials.objects.all()
+>>> creds
+[<Credentials: pyclass>, <Credentials: admin1>]
+
+    b. Update the NetworkDevice objects such that each NetworkDevice links to the correct Credentials.
+
+2. Set the vendor field of each NetworkDevice to the appropriate vendor. Save this field to the database.
+
+3. Create two new test NetworkDevices in the database. Use both direct object creation and the .get_or_create() method to create the devices.
+
+4. Remove the two objects created in the previous exercise from the database.
+
+5. Use Netmiko to connect to each of the devices in the database. Execute 'show version' on each device. Calculate the amount of time required to do this.
+
+6. Use threads and Netmiko to execute 'show version' on each device in the database. 
+Calculate the amount of time required to do this. What is the difference in time between executing 'show version' sequentially versus using threads?
+
+7. Repeat exercise #6 except use processes. 
+
+8. Optional bonus question--use a queue to get the output data back from the child processes in question #7. 
+Print this output data to the screen in the main process.
+
+
+

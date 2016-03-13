@@ -1,0 +1,14 @@
+---
+
+- name: "Class 7 / Lab 3 / test module"
+  hosts: arista 
+  tasks:
+    - name: "Set VLANS:"
+      c7_ansible_module:
+        name={{ item.name }}
+        vlanid={{ item.vlanid }}
+        sw={{ 'pynet-sw3' }}
+      with_items:
+        - { name: 'DATA', vlanid: '224' }
+        - { name: 'VOICE', vlanid: '225' }
+        - { name: 'VIDEO', vlanid: '226' }
